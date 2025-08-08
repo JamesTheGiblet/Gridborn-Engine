@@ -1,4 +1,4 @@
-🕹️ GRIDBORN PROTOCOL
+# 🕹️ GRIDBORN PROTOCOL
 
 AModular 8-Bit Arena Engine for Sovereign Combat
 
@@ -24,13 +24,15 @@ Each vehicle is a Sigil Vessel, forged by ancient builders and defined by:
 Movement Pattern: Speed, turn logic, grid interaction
 Trail Behavior: Length, fade rate, collision effect
 Combat Role: Zoner, flanker, disruptor, defender
-Class	Speed	Trail Type	Role	Lore Name
-Motorcycle	Fast	Thin, long	Agile	Flickerblade
-Tank	Slow	Thick, short	Zoner	Iron Sigil
-Plane	Medium	Air trail	Flanker	Skybrand
-Spaceship	Warp	Phased trail	Disruptor	Void Sovereign
-Ship	Slow	Wake trail	Defender	Tidewarden
-Mech Walker	Heavy	Footstep trail	Bruiser	Echo Stomp
+
+| Class        | Speed  | Trail Type      | Role      | Lore Name      |
+|--------------|--------|---------------- |-----------|----------------|
+| Motorcycle   | Fast   | Thin, long      | Agile     | Flickerblade   |
+| Tank         | Slow   | Thick, short    | Zoner     | Iron Sigil     |
+| Plane        | Medium | Air trail       | Flanker   | Skybrand       |
+| Spaceship    | Warp   | Phased trail    | Disruptor | Void Sovereign |
+| Ship         | Slow   | Wake trail      | Defender  | Tidewarden     |
+| Mech Walker  | Heavy  | Footstep trail  | Bruiser   | Echo Stomp     |
 
 🗺️ Arena System
 Arenas are Scroll Maps, each defined by:
