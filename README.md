@@ -1,72 +1,174 @@
-# 🕹️ Gridborn Engine
+Gridborn Engine
 
-A hackable 8-bit arena for TRON-style games.
+Gridborn Engine is a tactical combat framework for grid-based trail games. Inspired by the elegance of TRON-style mechanics, it enforces spatial discipline, modular extensibility, and deterministic gameplay. Designed for clarity, not complexity.
 
-### **The Problem**
+---
 
-Most game engines are bloated. I wanted something simple: a tiny, tactical engine for `TRON`-style combat that anyone could hack on over a weekend. Something where the grid is small, the action is tight, and your trail is as much a weapon as your vehicle.
+🎯 Design Philosophy
 
-### **What I Built**
+- Small Grid Constraint: All arenas are 8×8 to 16×16. This enforces tactical density, short decision loops, and predictable collision zones.
+- Trail-Based Combat: Movement leaves trails. Trails are the primary hazard and strategic tool.
+- Modular Vehicles: Vehicles are defined by movement logic, trail behavior, and collision response. No lore, no fluff—just mechanics.
 
-Gridborn is that engine. You pilot a vehicle around a small grid, leaving a deadly trail. The last one standing wins. It's built to be modular, so you can easily add your own vehicles, arenas, and rules without asking for permission.
+---
 
-Think `TRON` meets `Advance Wars`, but built for builders.
+🧩 Core Modules
 
-### **What's In The Box**
+1. Vehicle System
 
-  * **Modular Vehicles:** It comes with motorcycles, tanks, and planes, but they're just modules. You can build your own with different movement and trail logic.
-  * **Tiny Grids:** Combat happens on small grids (from 8x8 to 16x16). This keeps matches fast and tactical. No room for error.
-  * **Your Trail is a Weapon:** Every move you make leaves a solid trail behind you. Use it to trap opponents or get trapped yourself.
-  * **Real Obstacles:** Arenas have walls, warp zones, and other junk to keep you on your toes.
-  * **Power-ups (and Downs):** Simple pickups that can give you a speed boost or mess with your opponent's controls.
-  * **Hackable Lore:** All the "lore" is just in text files. If you don't like it, change it.
+Vehicles are composed of three modules:
 
-### **The Vehicles**
+| Module         | Description                                      | Example Values             |
+|----------------|--------------------------------------------------|----------------------------|
+| Movement Logic | How the vehicle moves per tick                   | Orthogonal, Diagonal, Warp |
+| Trail Type     | Behavior of the trail left behind                | Solid, Phased, Delayed     |
+| Collision Rule | What happens on trail or wall collision          | Explode, Bounce, Phase     |
 
-These are the starting classes. They're just examples. Each one is defined by its speed, trail, and job. Fork the repo and build your own.
+Phased Trail: Appears intermittently (e.g. every 2 ticks), allowing partial traversal. It alters collision logic and strategic planning.
 
-| Class       | Speed  | Trail Type     | Job       | My Nickname    |
-|-------------|--------|----------------|-----------|----------------|
-| Motorcycle  | Fast   | Thin, long     | Agile     | Flickerblade   |
-| Tank        | Slow   | Thick, short   | Zoner     | Iron Sigil     |
-| Plane       | Medium | Air trail      | Flanker   | Skybrand       |
-| Spaceship   | Warp   | Phased trail   | Disruptor | Void Sovereign |
-| Ship        | Slow   | Wake trail     | Defender  | Tidewarden     |
-| Mech Walker | Heavy  | Footstep trail | Bruiser   | Echo Stomp     |
+`rust
+trait Vehicle {
+  fn tick(&mut self, grid: &mut Grid);
+  fn trail_behavior(&self) -> TrailType;
+  fn on_collision(&self, other: &TrailType) -> CollisionResult;
+}
+`
 
-### **Arenas & Power-ups**
+---
 
-  * **Arenas:** Just tilemaps defined by a size, tiles (road, water, etc.), and obstacles (walls, mines). Nothing fancy.
-  * **Pickups:** Simple blessings and curses that spawn in the arena. `Sigil Surge` makes you faster, `Graviton Bind` makes you slower. You get the idea.
+2. Arena System
 
-### **The Guts (Architecture)**
+Arenas are defined by:
 
-No magic here. The code is the proof. It’s organized so you can find what you need and change it.
+- Grid Size: 8×8 to 16×16
+- Wall Layout: Static or dynamic
+- Pickup Zones: Optional modifiers (e.g. speed, trail type)
 
-```
-src/
-├── engine/       # Core loop, grid logic, collision (The important part)
-├── vehicles/     # Movement modules, trail logic (Make your own here)
-├── arena/        # Tilemaps, obstacles, pickups
-├── fx/           # Visual and audio effects
-├── lore/         # Text files with stories. Or not. Your call.
-├── ui/           # HUD, menus, intro text
-└── assets/       # Sprites, sounds, glyphs
-```
+Example .grid file:
 
-### **Known Issues (What's Still Janky)**
+`toml
+[arena]
+size = "12x12"
+walls = ["(3,3)", "(3,4)", "(3,5)"]
+pickups = ["speed_boost@5,5"]
+`
 
-  * The collision detection for `Phased trail` is a bit wonky on corners.
-  * The AI for CPU opponents is dumb as a brick. It just tries not to crash.
-  * There's no real menu system yet, you just launch straight into a match.
+Rendering is tile-based. Movement is discrete and deterministic.
 
-### **How to Get Started**
+---
 
-**Perfect is the imaginary friend of never shipped.** You don't need my permission.
+3. Effects System
 
-1.  Clone the repo.
-2.  Fire up the engine.
-3.  Pick a vehicle and a grid size.
-4.  Try not to crash.
+Effects are triggered by:
 
-Fork it, break it, and make something better. **Build first, ask permission never.**
+- Trail interactions
+- Pickup collisions
+- Arena triggers
+
+Examples:
+
+- Trail Surge: Temporarily doubles trail length
+- Grid Flip: Rotates arena 90° mid-match
+- Echo Pulse: Reveals opponent trail for 3 ticks
+
+`rust
+trait Effect {
+  fn trigger(&self, context: &GameState) -> EffectResult;
+}
+`
+
+---
+
+4. AI System
+
+Bots operate on a tactical decision tree:
+
+- Scan Grid: Identify safe paths
+- Predict Opponent: Estimate next 2 moves
+- React: Choose movement that avoids collision and maximizes trail coverage
+
+`rust
+fn choose_move(state: &GameState) -> Direction;
+`
+
+AI modules are testable in isolation and benchmarked against deterministic scenarios.
+
+---
+
+🛠 Technical Stack
+
+| Component         | Implementation                     |
+|-------------------|-------------------------------------|
+| Language          | Rust                                |
+| Framework         | Bevy (ECS-based game engine)        |
+| Multiplayer       | Peer-to-peer over QUIC              |
+| Rendering         | Tile-based grid renderer            |
+| State Management  | ECS with tick-based updates         |
+
+---
+
+🧪 Known Issues
+
+| Issue                  | Impact Level | Fix Status |
+|------------------------|--------------|------------|
+| Trail collision bug    | Critical     | In progress |
+| AI pathing failure     | High         | Under review |
+| Arena rotation glitch  | Medium       | Queued      |
+
+---
+
+🚫 Removed Features
+
+- No hackable lore systems
+- No fantasy naming conventions
+- No player-side scripting
+- No narrative modules
+
+Gridborn Engine is a tactical protocol, not a sandbox. Every mechanic is deterministic, every module is teachable, and every subsystem is designed for clarity.
+
+---
+
+📦 Getting Started
+
+`bash
+
+Clone the repo
+git clone https://github.com/gridborn/engine.git
+cd engine
+
+Build the project
+cargo build --release
+
+Run a test match
+cargo run --example duel
+`
+
+---
+
+📚 Documentation
+
+- Vehicle Interface Spec
+- Arena File Format
+- Effect System Overview
+- AI Strategy Modules
+
+---
+
+🧠 Contributing
+
+This engine is designed for tactical clarity and modular extension. Contributions should:
+- Preserve deterministic behavior
+- Avoid aesthetic drift
+- Prioritize testability and teachability
+
+Please see CONTRIBUTING.md for guidelines.
+
+---
+
+📄 License
+
+MIT License. See LICENSE.md for details.
+
+`
+
+---
